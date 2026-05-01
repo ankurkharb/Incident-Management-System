@@ -3,6 +3,8 @@
 
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+
 CREATE TABLE signal_counts (
     time            TIMESTAMPTZ NOT NULL,
     component_id    TEXT        NOT NULL,

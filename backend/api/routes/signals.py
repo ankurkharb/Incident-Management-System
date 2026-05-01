@@ -23,7 +23,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/",
+    "",
     status_code=202,
     summary="Ingest a raw signal",
     dependencies=[Depends(RateLimitDep)],

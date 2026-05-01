@@ -40,7 +40,7 @@ DASHBOARD_CACHE_TTL = 30  # seconds
 # GET / — list active incidents
 # ═══════════════════════════════════════════════════════════════════════════
 
-@router.get("/", response_model=list[WorkItemOut], summary="List active incidents")
+@router.get("", response_model=list[WorkItemOut], summary="List active incidents")
 async def list_incidents():
     """
     Return all non-CLOSED work items, ordered by priority then start_time.
