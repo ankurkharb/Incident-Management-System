@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 DEBOUNCE_TTL_SECONDS = 10
 MAX_CONCURRENT_WORKERS = 20
+METRICS_KEY = "metrics:signals_ingested"
 
 # Handles managed by the lifespan so we can cancel on shutdown.
 _worker_tasks: list[asyncio.Task] = []
@@ -189,6 +190,9 @@ async def _process_signal(signal: dict[str, Any]) -> None:
             work_item_id,
             component_id,
         )
+
+    # ── Metrics: track total signals ingested ───────────────────────────
+    await redis.incr(METRICS_KEY)
 
 
 # ═══════════════════════════════════════════════════════════════════════════

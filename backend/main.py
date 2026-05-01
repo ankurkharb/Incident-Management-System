@@ -2,10 +2,14 @@
 main.py
 -------
 FastAPI application factory.
-Wires database connection pools via the lifespan context manager
-and registers all API routers.
+Wires database connection pools, debounce workers, and throughput metrics
+via the lifespan context manager.  Registers all API routers.
 """
 
+from __future__ import annotations
+
+import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -17,10 +21,52 @@ from backend.db.mongo_setup import init_mongo
 from backend.core.debounce import start_debounce_workers, stop_debounce_workers
 from backend.api.routes import health, incidents, signals
 
+logger = logging.getLogger(__name__)
+
+METRICS_KEY = "metrics:signals_ingested"
+METRICS_INTERVAL = 5  # seconds
+
+_metrics_task: asyncio.Task | None = None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Throughput metrics background task
+# ═══════════════════════════════════════════════════════════════════════════
+
+async def _throughput_reporter() -> None:
+    """
+    Every 5 s, read and reset the Redis counter ``metrics:signals_ingested``,
+    compute signals/sec, and log it.
+    """
+    from backend.db.redis_client import get_redis
+
+    while True:
+        await asyncio.sleep(METRICS_INTERVAL)
+        try:
+            redis = await get_redis()
+            # GETSET is atomic: returns old value and sets to 0
+            raw = await redis.getset(METRICS_KEY, 0)
+            count = int(raw) if raw else 0
+            rate = count / METRICS_INTERVAL
+            logger.info(
+                "Throughput: %d signals in %ds (%.1f signals/sec)",
+                count,
+                METRICS_INTERVAL,
+                rate,
+            )
+        except Exception:
+            logger.exception("Throughput reporter error")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Lifespan
+# ═══════════════════════════════════════════════════════════════════════════
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup: create connection pools. Shutdown: close them."""
+    global _metrics_task
+
     # ── Startup ─────────────────────────────────────────────────────────
     await connect_postgres()
     await connect_mongo()
@@ -32,9 +78,18 @@ async def lifespan(app: FastAPI):
     # Start debounce worker pool (N async tasks draining the signal buffer)
     await start_debounce_workers()
 
+    # Start throughput metrics reporter
+    _metrics_task = asyncio.create_task(
+        _throughput_reporter(), name="throughput-reporter"
+    )
+
     yield
 
     # ── Shutdown ────────────────────────────────────────────────────────
+    if _metrics_task is not None:
+        _metrics_task.cancel()
+        await asyncio.gather(_metrics_task, return_exceptions=True)
+
     await stop_debounce_workers()
     await close_postgres()
     await close_mongo()
@@ -49,5 +104,5 @@ app = FastAPI(
 
 # ── Register routers ───────────────────────────────────────────────────
 app.include_router(health.router)
-app.include_router(incidents.router, prefix="/api/incidents", tags=["incidents"])
-app.include_router(signals.router, prefix="/api/signals", tags=["signals"])
+app.include_router(incidents.router, prefix="/api/v1/incidents", tags=["incidents"])
+app.include_router(signals.router, prefix="/api/v1/signals", tags=["signals"])
