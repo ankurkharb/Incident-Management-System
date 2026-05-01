@@ -5,7 +5,7 @@ Centralised application settings loaded from environment variables.
 Uses pydantic-settings so Docker Compose can inject values without hardcoding.
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -19,9 +19,8 @@ class Settings(BaseSettings):
     # ── Redis ───────────────────────────────────────────────────────────
     REDIS_URL: str = "redis://redis:6379/0"
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 settings = Settings()
+

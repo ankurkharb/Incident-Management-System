@@ -3,8 +3,13 @@ services:
     image: timescale/timescaledb:latest-pg16
     ports:
       - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ims
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./backend/db/migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -40,6 +45,11 @@ services:
       context: ./backend
     ports:
       - "8000:8000"
+    environment:
+      POSTGRES_DSN: postgresql://postgres:postgres@postgres:5432/ims
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB_NAME: ims
+      REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,6 +57,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
@@ -63,7 +78,9 @@ services:
       dockerfile: mock-producer.Dockerfile
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
+    profiles:
+      - seed
 
 volumes:
   postgres_data:
