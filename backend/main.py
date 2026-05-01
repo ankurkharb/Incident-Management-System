@@ -14,6 +14,7 @@ from backend.db.postgres import connect_postgres, close_postgres
 from backend.db.mongo import connect_mongo, close_mongo
 from backend.db.redis_client import connect_redis, close_redis
 from backend.db.mongo_setup import init_mongo
+from backend.core.debounce import start_debounce_workers, stop_debounce_workers
 from backend.api.routes import health, incidents, signals
 
 
@@ -28,9 +29,13 @@ async def lifespan(app: FastAPI):
     # Ensure MongoDB indexes exist
     await init_mongo()
 
+    # Start debounce worker pool (N async tasks draining the signal buffer)
+    await start_debounce_workers()
+
     yield
 
     # ── Shutdown ────────────────────────────────────────────────────────
+    await stop_debounce_workers()
     await close_postgres()
     await close_mongo()
     await close_redis()
