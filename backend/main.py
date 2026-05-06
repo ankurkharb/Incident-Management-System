@@ -102,6 +102,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# ── CORS — required for Render deployment (separate domains) ──────────
+from fastapi.middleware.cors import CORSMiddleware
+import os
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.getenv("CORS_ORIGINS", "*").split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ── Register routers ───────────────────────────────────────────────────
 app.include_router(health.router)
 app.include_router(incidents.router, prefix="/api/v1/incidents", tags=["incidents"])
