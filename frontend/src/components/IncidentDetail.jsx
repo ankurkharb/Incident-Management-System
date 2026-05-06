@@ -56,7 +56,7 @@ export default function IncidentDetail() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin glow-cyan" />
       </div>
     )
   }
@@ -78,21 +78,21 @@ export default function IncidentDetail() {
   return (
     <div className="space-y-8">
       {/* ── Work-item header ──────────────────────────────────────── */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
+      <div className="glass-panel rounded-xl p-6">
         <div className="flex items-start justify-between mb-4">
           <div>
             <h2 className="text-xl font-semibold">{wi.component_id}</h2>
             <p className="text-xs text-gray-500 mt-1 font-mono">{wi.id}</p>
           </div>
-          <span className="px-3 py-1 rounded-md text-xs font-medium bg-indigo-500/10 text-indigo-400 ring-1 ring-inset ring-indigo-500/20">
+          <span className="px-3 py-1 rounded-md text-xs font-bold font-label-caps bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
             {wi.priority}
           </span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
           <div>
-            <p className="text-gray-500 text-xs mb-1">Status</p>
-            <p className="font-medium">{wi.status}</p>
+            <p className="text-slate-500 text-xs mb-1 font-label-caps">Status</p>
+            <p className="font-medium text-slate-200">{wi.status}</p>
           </div>
           <div>
             <p className="text-gray-500 text-xs mb-1">Start time</p>
@@ -110,8 +110,8 @@ export default function IncidentDetail() {
       </div>
 
       {/* ── Workflow stepper ──────────────────────────────────────── */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
-        <h3 className="text-sm font-semibold text-gray-400 mb-4">Lifecycle</h3>
+      <div className="glass-panel rounded-xl p-6">
+        <h3 className="text-sm font-label-caps text-slate-400 mb-4">LIFECYCLE</h3>
         <div className="flex items-center gap-0">
           {STEPS.map((step, i) => {
             const isCurrent = i === currentIdx
@@ -124,7 +124,7 @@ export default function IncidentDetail() {
                       w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold
                       transition-all duration-300
                       ${isCurrent
-                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30 scale-110'
+                        ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30 scale-110 glow-cyan'
                         : isPast
                           ? 'bg-emerald-500/20 text-emerald-400 ring-2 ring-emerald-500/40'
                           : 'bg-gray-800 text-gray-600'}
@@ -132,7 +132,7 @@ export default function IncidentDetail() {
                   >
                     {isPast ? '✓' : i + 1}
                   </div>
-                  <p className={`mt-2 text-[10px] font-medium ${isCurrent ? 'text-indigo-400' : isPast ? 'text-emerald-500' : 'text-gray-600'}`}>
+                  <p className={`mt-2 text-[10px] font-bold font-label-caps ${isCurrent ? 'text-cyan-400' : isPast ? 'text-emerald-500' : 'text-slate-600'}`}>
                     {step}
                   </p>
                 </div>
@@ -147,13 +147,13 @@ export default function IncidentDetail() {
 
       {/* ── Transition controls ───────────────────────────────────── */}
       {possibleNext.length > 0 && (
-        <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
-          <h3 className="text-sm font-semibold text-gray-400 mb-3">Transition Status</h3>
+        <div className="glass-panel rounded-xl p-6">
+          <h3 className="text-sm font-label-caps text-slate-400 mb-3">TRANSITION_STATUS</h3>
           <div className="flex items-center gap-3 flex-wrap">
             <select
               value={targetStatus}
               onChange={(e) => setTargetStatus(e.target.value)}
-              className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="bg-slate-900 border border-cyan-900/30 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 font-code-mono"
             >
               <option value="">Select target…</option>
               {possibleNext.map((s) => (
@@ -163,7 +163,7 @@ export default function IncidentDetail() {
             <button
               onClick={handleTransition}
               disabled={!targetStatus || transitioning}
-              className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-lg bg-cyan-500 text-on-primary hover:shadow-[0_0_15px_rgba(0,240,255,0.4)] disabled:opacity-40 disabled:cursor-not-allowed text-sm font-label-caps transition-all cursor-pointer"
             >
               {transitioning ? 'Transitioning…' : 'Apply'}
             </button>
@@ -195,8 +195,8 @@ export default function IncidentDetail() {
       )}
 
       {/* ── Raw signals table ─────────────────────────────────────── */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900/60 p-6">
-        <h3 className="text-sm font-semibold text-gray-400 mb-4">
+      <div className="glass-panel rounded-xl p-6">
+        <h3 className="text-sm font-label-caps text-slate-400 mb-4">
           Raw Signals
           <span className="ml-2 text-gray-600 font-normal">({signals.length})</span>
         </h3>
