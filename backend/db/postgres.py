@@ -25,10 +25,14 @@ _pool: Pool | None = None
 async def connect_postgres() -> Pool:
     """Create the connection pool (called during app startup)."""
     global _pool
+    dsn = settings.POSTGRES_DSN
+    # Neon and other cloud PG providers require SSL
+    ssl_mode = "require" if "sslmode=require" in dsn else None
     _pool = await asyncpg.create_pool(
-        dsn=settings.POSTGRES_DSN,
-        min_size=5,
-        max_size=20,
+        dsn=dsn,
+        min_size=2,
+        max_size=10,
+        ssl=ssl_mode,
     )
     return _pool
 

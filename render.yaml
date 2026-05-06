@@ -2,13 +2,6 @@
 # Deploy with: Render Dashboard → New → Blueprint → Connect this repo
 # Docs: https://render.com/docs/blueprint-spec
 
-databases:
-  - name: ims-postgres
-    databaseName: ims
-    user: ims_user
-    plan: free
-    region: oregon
-
 services:
   # ── FastAPI Backend ────────────────────────────────────────────────────
   - type: web
@@ -22,9 +15,7 @@ services:
     healthCheckPath: /health
     envVars:
       - key: POSTGRES_DSN
-        fromDatabase:
-          name: ims-postgres
-          property: connectionString
+        value: "postgresql://neondb_owner:npg_iK7mcJRt6INM@ep-young-bird-apciatap-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require"
       - key: MONGO_URI
         sync: false  # Set manually in dashboard (MongoDB Atlas)
       - key: MONGO_DB_NAME

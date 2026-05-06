@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # ── PostgreSQL (+ TimescaleDB) ──────────────────────────────────────
-    POSTGRES_DSN: str = "postgresql://postgres:postgres@postgres:5432/ims"
+    POSTGRES_DSN: str = "postgresql://neondb_owner:npg_iK7mcJRt6INM@ep-young-bird-apciatap-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
     # ── MongoDB ─────────────────────────────────────────────────────────
     MONGO_URI: str = "mongodb://mongo:27017"
